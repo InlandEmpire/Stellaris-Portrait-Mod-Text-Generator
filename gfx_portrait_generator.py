@@ -12,26 +12,38 @@ import platform
 import os
 
 #Set image directory, file output directory, custo race name, and default race image here
-image_directory = '/Volumes/Macintosh EX/1) Projects/5) Gaming/Stellaris/Koverse/Source Control/Koverse/gfx/models/portraits/Aukuvon'
-output_directory = '/Users/anon/Desktop'
-race_name = 'Aukvon'
-race_image = '77'
+image_directory = 'your/directory/here'
+output_directory = 'your/directory/here'
+race_name = 'race_name'
+race_image = '1'
 
 class text_generator:
 
     def __init__(self):
-    #def __init__(self, image_directory, output_directory, race_name, race_image)
         self.image_directory = image_directory
         self.output_directory = output_directory
         self.race_name = race_name
         self.race_image = race_image
 
+    def string_iterator(self, limit, start_string, iterate_string, *args):
+        counter = 1
+        loopproduct=''
+        for filename in os.listdir(image_directory):
+            if counter > limit:
+                break
+            else:
+                counter_string = str(counter)
+                loopproduct += iterate_string.format(*args, *([counter_string]*iterate_string.count('{}')))
+                counter += 1
+        processed_string = start_string + loopproduct
+        return processed_string
+
     def get_file_count(self):
         #Checking for appropriate number of files to work with
         OS = platform.system()
-        if OS=='Darwin':
+        if OS == 'Darwin':
             count = 0
-            # Iterate image_directory
+            #Iterate image_directory
             for path in os.listdir(image_directory):
                 # check if current path is a file
                 if os.path.isfile(os.path.join(image_directory, path)):
@@ -41,7 +53,7 @@ class text_generator:
             print('File count:', count)
         else:
             count = 0
-            # Iterate image_directory
+            #Iterate image_directory
             for path in os.listdir(image_directory):
                 # check if current path is a file
                 if os.path.isfile(os.path.join(image_directory, path)):
@@ -50,63 +62,30 @@ class text_generator:
         return  limit
 
     def portraits_section(self, limit):
-        string = 'portraits = { \n#Default'
-        counter = 1
-        loopproduct=''
-        for filename in os.listdir(image_directory):
-            if counter > limit:
-                break
-            else:
-                counterstring = str(counter)
-                loopproduct = loopproduct+'\n	'+race_name+'_'+counterstring+ '= {texturefile = "gfx/models/portraits/'+race_name+'/'+race_name+'_'+counterstring+'.dds"}'
-                counter = counter +1
-        string = string + loopproduct
-        portrait_string = string
+        start_string = 'portraits = { \n#Default'
+        iterate_string = '\n	'+race_name+'_{}= {{texturefile = "gfx/models/portraits/'+race_name+'/'+race_name+'_{}.dds"}}'
+        portrait_string = self.string_iterator(limit, start_string, iterate_string)
         #print(portrait_string)
         return portrait_string
 
     def portrait_groups_section(self, limit):
-        string = '\n}\n\nportrait_groups = {\n	'+race_name+'= {\n		default = '+race_name+'_'+race_image+'\n		game_setup = {\n			add ={\n 				portraits = {'
-        counter = 1
-        loopproduct = ''
-        for filename in os.listdir(image_directory):
-            if counter > limit:
-                break
-            else:
-                counterstring = str(counter)
-                loopproduct = loopproduct + '\n					'+race_name+'_'+counterstring
-                counter = counter + 1
-        portrait_groups_string=string+loopproduct
+        start_string = '\n}\n\nportrait_groups = {\n	'+race_name+'= {\n		default = '+race_name+'_'+race_image+'\n		game_setup = {\n			add ={\n 				portraits = {'
+        iterate_string = '\n					'+race_name+'_{}'
+        portrait_groups_string = self.string_iterator(limit, start_string, iterate_string)
         #print(portrait_groups_string)
         return portrait_groups_string
 
     def leaders_section(self, limit):
-        string = '\n				}\n			}\n		}\n		leader = {\n			add = {\n						portraits = {'
-        counter = 1
-        loopproduct = ''
-        for filename in os.listdir(image_directory):
-            if counter > limit:
-                break
-            else:
-                counterstring = str(counter)
-                loopproduct = loopproduct + '\n 							'+race_name+'_'+counterstring
-                counter = counter + 1
-        leaders_string = string + loopproduct
+        start_string = '\n				}\n			}\n		}\n		leader = {\n			add = {\n						portraits = {'
+        iterate_string = '\n 							'+race_name+'_{}'
+        leaders_string = self.string_iterator(limit, start_string, iterate_string)
         #print(leaders_string)
         return leaders_string
 
     def rulers_section(self, limit):
-        string = '\n				}\n			}\n		}\n		ruler = {\n			add = {\n						portraits = {'
-        counter=1
-        loopproduct=''
-        for filename in os.listdir(image_directory):
-            if counter > limit:
-                break
-            else:
-                counterstring = str(counter)
-                loopproduct = loopproduct + '\n 							'+race_name+'_'+counterstring
-                counter = counter + 1
-        rulers_string = string + loopproduct
+        start_string = '\n				}\n			}\n		}\n		ruler = {\n			add = {\n						portraits = {'
+        iterate_string = '\n 							'+race_name+'_{}'
+        rulers_string = self.string_iterator(limit, start_string, iterate_string)
         #print(rulers_string)
         return  rulers_string
 
@@ -127,8 +106,8 @@ def main():
     species_portrait_string = text_generator_obj.set_species_portrait_section()
 
     #Assemble components and export
-    f = open(output_directory+'/'+race_name+'_'+race_name+'.txt', 'w')
-    f.write(portraits_string + portrait_groups_string + leaders_string + rulers_string + species_portrait_string)
+    file = open(output_directory+'/'+race_name+'_'+race_name+'.txt', 'w')
+    file.write(portraits_string + portrait_groups_string + leaders_string + rulers_string + species_portrait_string)
     print('Necessary text file has been placed in '+output_directory+'/'+race_name+'_'+race_name+'.txt')
 
 if __name__ == '__main__':
